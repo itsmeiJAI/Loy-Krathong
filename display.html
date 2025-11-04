@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LED Display - กระทงลอย</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Sarabun', 'Cormorant Garamond', serif;
+            background: #0000ff;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Ambient light particles */
+        .light-particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(255, 235, 200, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float-light 8s infinite ease-in-out;
+            box-shadow: 0 0 10px rgba(255, 235, 200, 0.8);
+        }
+        
+        @keyframes float-light {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(30px);
+                opacity: 0;
+            }
+        }
+        
+        /* Krathong container with elegant appearance */
+        .krathong-container {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            transform: scale(0) translateY(50px);
+            transition: all 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 100;
+            filter: none;
+        }
+        
+        .krathong-container.show {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+        
+        .krathong-container.fade-out {
+            opacity: 0;
+            transform: scale(0.5) translateY(-50px);
+            transition: all 1.2s ease-in-out;
+        }
+        
+        .krathong-icon {
+            display: none;
+        }
+
+        .krathong-icon-img {
+            width: 300px;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 22px;
+            margin-bottom: 20px;
+            filter: none;
+            animation: gentle-float 4s ease-in-out infinite;
+            background: transparent;
+            border: none;
+        }
+        
+        @keyframes gentle-float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .krathong-message {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 247, 240, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 12px 18px;
+            box-shadow: none;
+            border: 1px solid rgba(139, 94, 60, 0.15);
+            font-size: 18px;
+            font-weight: 400;
+            color: #5a4a3a;
+            text-shadow: none;
+            max-width: 320px;
+            text-align: center;
+            word-wrap: break-word;
+            position: relative;
+            letter-spacing: 0.3px;
+            line-height: 1.5;
+        }
+        
+        .krathong-message::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 20px;
+            right: 20px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+        }
+        
+        .krathong-message::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            right: -15px;
+            font-size: 20px;
+            opacity: 0.7;
+        }
+        
+        .krathong-blessing {
+            position: absolute;
+            top: -18px;
+            left: -18px;
+            font-size: 22px;
+            opacity: 0.8;
+        }
+        
+        /* Elegant floating animations */
+        .pattern-1 {
+            animation: elegant-float-1 30s ease-in-out infinite;
+        }
+        
+        .pattern-2 {
+            animation: elegant-float-2 35s ease-in-out infinite;
+        }
+        
+        .pattern-3 {
+            animation: elegant-float-3 40s ease-in-out infinite;
+        }
+        
+        @keyframes elegant-float-1 {
+            0%, 100% { 
+                transform: translate(0, 0); 
+            }
+            25% { 
+                transform: translate(250px, -120px); 
+            }
+            50% { 
+                transform: translate(120px, 200px); 
+            }
+            75% { 
+                transform: translate(-200px, 100px); 
+            }
+        }
+        
+        @keyframes elegant-float-2 {
+            0%, 100% { 
+                transform: translate(0, 0); 
+            }
+            20% { 
+                transform: translate(-150px, -200px); 
+            }
+            40% { 
+                transform: translate(220px, -100px); 
+            }
+            60% { 
+                transform: translate(280px, 150px); 
+            }
+            80% { 
+                transform: translate(-100px, 250px); 
+            }
+        }
+        
+        @keyframes elegant-float-3 {
+            0%, 100% { 
+                transform: translate(0, 0); 
+            }
+            33% { 
+                transform: translate(300px, 50px); 
+            }
+            66% { 
+                transform: translate(50px, -280px); 
+            }
+        }
+        
+        /* Minimalist status indicator */
+        .status {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 14px;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(139, 94, 60, 0.1);
+            letter-spacing: 0.5px;
+        }
+        
+        .status.connected {
+            color: #6b8e23;
+        }
+        
+        .status.disconnected {
+            color: #a0826d;
+        }
+        
+        /* Refined debug panel */
+        .debug {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(10px);
+            color: #f5f5dc;
+            padding: 18px 22px;
+            border-radius: 18px;
+            font-size: 13px;
+            z-index: 1000;
+            display: none;
+            min-width: 220px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .debug-row {
+            margin: 6px 0;
+            display: flex;
+            justify-content: space-between;
+            gap: 25px;
+        }
+        
+        .debug-label {
+            color: #d4af37;
+            font-weight: 500;
+        }
+        
+        .debug-value {
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        /* Sophisticated color themes for each krathong type */
+        .type-lotus .krathong-message {
+            background: linear-gradient(135deg, rgba(255, 240, 245, 0.95) 0%, rgba(255, 228, 235, 0.95) 100%);
+            border: 1px solid rgba(255, 105, 180, 0.2);
+            color: #8b5f7d;
+            box-shadow: none;
+        }
+        
+        .type-banana .krathong-message {
+            background: linear-gradient(135deg, rgba(255, 250, 235, 0.95) 0%, rgba(255, 248, 220, 0.95) 100%);
+            border: 1px solid rgba(218, 165, 32, 0.2);
+            color: #8b7355;
+            box-shadow: none;
+        }
+        
+        .type-flower .krathong-message {
+            background: linear-gradient(135deg, rgba(255, 245, 248, 0.95) 0%, rgba(255, 235, 240, 0.95) 100%);
+            border: 1px solid rgba(255, 182, 193, 0.25);
+            color: #9b6b7e;
+            box-shadow: none;
+        }
+        
+        .type-rose .krathong-message {
+            background: linear-gradient(135deg, rgba(255, 240, 240, 0.95) 0%, rgba(255, 228, 228, 0.95) 100%);
+            border: 1px solid rgba(220, 20, 60, 0.2);
+            color: #8b475d;
+            box-shadow: none;
+        }
+        
+        .type-lantern .krathong-message {
+            background: linear-gradient(135deg, rgba(255, 248, 240, 0.95) 0%, rgba(255, 245, 230, 0.95) 100%);
+            border: 1px solid rgba(255, 140, 0, 0.2);
+            color: #8b6914;
+            box-shadow: none;
+        }
+        
+        .type-candle .krathong-message {
+            background: linear-gradient(135deg, rgba(255, 250, 240, 0.95) 0%, rgba(255, 248, 230, 0.95) 100%);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            color: #8b7500;
+            box-shadow: none;
+        }
+        
+        @media (max-width: 768px) {
+            .krathong-icon-img {
+                width: 90px;
+                height: 90px;
+            }
+            
+            .krathong-message {
+                font-size: 22px;
+                padding: 16px 28px;
+                max-width: 350px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="status" class="status disconnected">กำลังเชื่อมต่อ</div>
+    
+    <div id="debug" class="debug">
+        <div class="debug-row">
+            <span class="debug-label">กระทงทั้งหมด</span>
+            <span class="debug-value" id="totalCount">0</span>
+        </div>
+        <div class="debug-row">
+            <span class="debug-label">กำลังแสดง</span>
+            <span class="debug-value" id="activeCount">0</span>
+        </div>
+        <div class="debug-row">
+            <span class="debug-label">ล่าสุด</span>
+            <span class="debug-value" id="lastMessage">-</span>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js';
+        import { getFirestore, collection, query, orderBy, onSnapshot, where, Timestamp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYAA--dU7azrYQaFJfsmMvfxLI-NNtoxU",
+            authDomain: "sendtd-demo.firebaseapp.com",
+            projectId: "sendtd-demo",
+            storageBucket: "sendtd-demo.firebasestorage.app",
+            messagingSenderId: "201616527485",
+            appId: "1:201616527485:web:81efdec075072761eaa114",
+            measurementId: "G-D3RF03J1N7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const krathongImages = {
+            lotus: 'img/Krathong-1.png',
+            banana: 'img/Krathong-2.png',
+            flower: 'img/flower.png',
+            rose: 'img/rose.png',
+            lantern: 'img/lantern.png',
+            candle: 'img/candle.png'
+        };
+
+        const blessings = ['', '', '', '', '', ''];
+
+        let totalCount = 0;
+        let activeKrathongs = new Set();
+        const patterns = ['pattern-1', 'pattern-2', 'pattern-3'];
+
+        const statusEl = document.getElementById('status');
+        const debugEl = document.getElementById('debug');
+        const totalCountEl = document.getElementById('totalCount');
+        const activeCountEl = document.getElementById('activeCount');
+        const lastMessageEl = document.getElementById('lastMessage');
+
+        // Create ambient light particles
+        function createLightParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'light-particle';
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+            particle.style.animationDelay = Math.random() * 2 + 's';
+            document.body.appendChild(particle);
+            
+            setTimeout(() => {
+                particle.remove();
+            }, 10000);
+        }
+
+        setInterval(createLightParticle, 800);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'd') {
+                debugEl.style.display = debugEl.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+
+        function getRandomPosition() {
+            const margin = 180;
+            return {
+                x: Math.random() * (window.innerWidth - margin * 2) + margin,
+                y: Math.random() * (window.innerHeight - margin * 2) + margin
+            };
+        }
+
+        function rectsOverlap(a, b, padding = 16) {
+            return !(
+                a.right + padding < b.left ||
+                a.left - padding > b.right ||
+                a.bottom + padding < b.top ||
+                a.top - padding > b.bottom
+            );
+        }
+
+        function placeWithoutOverlap(container) {
+            const attempts = 60;
+            for (let i = 0; i < attempts; i++) {
+                const pos = getRandomPosition();
+                container.style.left = pos.x + 'px';
+                container.style.top = pos.y + 'px';
+                const rect = container.getBoundingClientRect();
+                const others = Array.from(document.querySelectorAll('.krathong-container'))
+                    .filter(el => el !== container);
+                const overlap = others.some(el => rectsOverlap(rect, el.getBoundingClientRect(), 24));
+                if (!overlap) return;
+            }
+        }
+
+        function resolveCollisions() {
+            const nodes = Array.from(document.querySelectorAll('.krathong-container'));
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const a = nodes[i];
+                    const b = nodes[j];
+                    const ra = a.getBoundingClientRect();
+                    const rb = b.getBoundingClientRect();
+                    if (rectsOverlap(ra, rb, 8)) {
+                        const dx = (ra.left + ra.width / 2) - (rb.left + rb.width / 2);
+                        const dy = (ra.top + ra.height / 2) - (rb.top + rb.height / 2);
+                        const len = Math.max(1, Math.hypot(dx, dy));
+                        const ux = dx / len;
+                        const uy = dy / len;
+                        const push = 14;
+                        const ax = Math.min(Math.max(0, (parseFloat(a.style.left) || 0) + ux * push), window.innerWidth - ra.width);
+                        const ay = Math.min(Math.max(0, (parseFloat(a.style.top) || 0) + uy * push), window.innerHeight - ra.height);
+                        const bx = Math.min(Math.max(0, (parseFloat(b.style.left) || 0) - ux * push), window.innerWidth - rb.width);
+                        const by = Math.min(Math.max(0, (parseFloat(b.style.top) || 0) - uy * push), window.innerHeight - rb.height);
+                        a.style.left = ax + 'px';
+                        a.style.top = ay + 'px';
+                        b.style.left = bx + 'px';
+                        b.style.top = by + 'px';
+                    }
+                }
+            }
+        }
+
+        function createKrathong(data) {
+            const container = document.createElement('div');
+            container.className = 'krathong-container type-' + data.krathong;
+            
+            const randomPattern = patterns[Math.floor(Math.random() * patterns.length)];
+            container.classList.add(randomPattern);
+            
+            const icon = document.createElement('img');
+            icon.className = 'krathong-icon-img';
+            icon.src = krathongImages[data.krathong] || 'images/lotus.png';
+            icon.alt = data.krathong;
+            
+            const blessing = document.createElement('div');
+            blessing.className = 'krathong-blessing';
+            blessing.textContent = blessings[Math.floor(Math.random() * blessings.length)];
+            
+            const message = document.createElement('div');
+            message.className = 'krathong-message';
+            message.textContent = data.text;
+            message.appendChild(blessing);
+            
+            container.appendChild(icon);
+            container.appendChild(message);
+            
+            // Place with simple non-overlapping attempts
+            document.body.appendChild(container);
+            placeWithoutOverlap(container);
+            
+            const krathongId = Date.now() + Math.random();
+            container.dataset.krathongId = krathongId;
+            activeKrathongs.add(krathongId);
+            
+            
+            requestAnimationFrame(() => {
+                container.classList.add('show');
+            });
+            
+            setTimeout(() => {
+                container.classList.add('fade-out');
+                setTimeout(() => {
+                    if (container.parentNode) {
+                        container.parentNode.removeChild(container);
+                    }
+                    activeKrathongs.delete(krathongId);
+                    updateDebugInfo();
+                }, 1200);
+            }, 30000);
+            
+            updateDebugInfo();
+        }
+
+        function updateDebugInfo() {
+            totalCountEl.textContent = totalCount;
+            activeCountEl.textContent = activeKrathongs.size;
+        }
+
+        function updateStatus(connected) {
+            if (connected) {
+                statusEl.textContent = 'เชื่อมต่อแล้ว';
+                statusEl.className = 'status connected';
+            } else {
+                statusEl.textContent = 'ไม่ได้เชื่อมต่อ';
+                statusEl.className = 'status disconnected';
+            }
+        }
+
+        try {
+            const oneHourAgo = new Date();
+            oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+            
+            const krathongsQuery = query(
+                collection(db, 'krathongs'),
+                where('timestamp', '>', Timestamp.fromDate(oneHourAgo)),
+                orderBy('timestamp', 'desc')
+            );
+
+            let isFirstLoad = true;
+            
+            const unsubscribe = onSnapshot(krathongsQuery, (snapshot) => {
+                updateStatus(true);
+                
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === 'added') {
+                        const krathongData = change.doc.data();
+                        
+                        if (isFirstLoad) return;
+                        
+                        console.log('New krathong:', krathongData);
+                        
+                        totalCount++;
+                        const time = new Date().toLocaleTimeString('th-TH');
+                        lastMessageEl.textContent = time;
+                        
+                        createKrathong(krathongData);
+                    }
+                });
+                
+                isFirstLoad = false;
+            }, (error) => {
+                console.error('Firebase error:', error);
+                updateStatus(false);
+            });
+            
+        } catch (error) {
+            console.error('Setup error:', error);
+            updateStatus(false);
+        }
+
+        updateStatus(false);
+
+        setTimeout(() => {
+            console.log('Adding test krathong...');
+            createKrathong({ 
+                krathong: 'lotus', 
+                text: 'ขอให้ทุกคนมีความสุข สุขภาพแข็งแรง' 
+            });
+        }, 2000);
+
+        setInterval(resolveCollisions, 800);
+
+        window.addEventListener('resize', () => {
+            const krathongs = document.querySelectorAll('.krathong-container');
+            krathongs.forEach(krathong => {
+                const rect = krathong.getBoundingClientRect();
+                if (rect.right > window.innerWidth || rect.bottom > window.innerHeight) {
+                    const pos = getRandomPosition();
+                    krathong.style.left = pos.x + 'px';
+                    krathong.style.top = pos.y + 'px';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

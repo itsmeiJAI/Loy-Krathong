@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ปล่อยใจไปลอย</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Noto Sans Thai', 'Sarabun', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Fullscreen background video for send page */
+    #bgVideo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: -1;
+      pointer-events: none;
+      background: #000;
+    }
+    
+    /* Floating lanterns animation */
+    .lantern {
+      position: absolute;
+      color: rgba(255, 200, 124, 0.3);
+      font-size: 30px;
+      animation: float-up 15s infinite linear;
+      pointer-events: none;
+    }
+    
+    @keyframes float-up {
+      0% {
+        transform: translateY(100vh) translateX(0) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100px) translateX(50px) rotate(10deg);
+        opacity: 0;
+      }
+    }
+    
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 30px;
+      padding: 2rem 1.5rem;
+      box-shadow: 0 20px 60px rgba(255, 200, 124, 0.4);
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      position: relative;
+      border: 3px solid rgba(255, 200, 124, 0.5);
+    }
+    
+    .title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #ff8c42;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 2px 4px rgba(255, 140, 66, 0.3);
+      font-family: 'Kanit', 'Noto Sans Thai', 'Sarabun', sans-serif;
+    }
+    
+    .subtitle {
+      font-size: 1rem;
+      color: #ff9f5a;
+      margin-bottom: 1rem;
+      font-weight: 400;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      color: #ff8c42;
+      font-weight: 700;
+      margin: 0.5rem 0 0.75rem;
+    }
+    
+    .krathong-selector {
+      margin-bottom: 2rem;
+    }
+    
+    .krathong-label {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #ff8c42;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    
+    .krathong-carousel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 1rem;
+    }
+
+    .nav-button {
+      background: rgba(255, 140, 66, 0.15);
+      border: 2px solid #ffb077;
+      color: #ff8c42;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .nav-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 140, 66, 0.35);
+    }
+
+    .krathong-track {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(120px, 1fr);
+      gap: 12px;
+      overflow: hidden;
+      width: 100%;
+    }
+    
+    .krathong-option {
+      background: rgba(255, 140, 66, 0.1);
+      border: 3px solid transparent;
+      border-radius: 20px;
+      padding: 15px 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .krathong-option:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(255, 140, 66, 0.3);
+    }
+    
+    .krathong-option.selected {
+      border-color: #ff8c42;
+      background: rgba(255, 140, 66, 0.2);
+      /*box-shadow: 0 10px 25px rgba(255, 140, 66, 0.5);*/
+    }
+    
+    .krathong-icon {
+      display: none;
+    }
+
+    .krathong-img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 14px;
+      display: block;
+      margin: 0 auto 0.5rem auto;
+      /*border: 2px solid rgba(255, 140, 66, 0.25);*/
+      /*box-shadow: 0 4px 10px rgba(255, 140, 66, 0.15);*/
+      background: transparent;
+    }
+    
+    .krathong-name {
+      font-size: 0.9rem;
+      color: #ff8c42;
+      font-weight: 600;
+    }
+    
+    .input-container {
+      margin-bottom: 2rem;
+    }
+    
+    .message-label {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #ff8c42;
+      margin-bottom: 0.8rem;
+      display: block;
+      text-align: left;
+    }
+    
+    .message-input {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      font-size: 1rem;
+      border: 3px solid #ffc87c;
+      border-radius: 20px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+      font-family: 'Sarabun', sans-serif;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(255, 200, 124, 0.2);
+    }
+    
+    .message-input:focus {
+      border-color: #ff8c42;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 140, 66, 0.4);
+    }
+    
+    .message-input::placeholder {
+      color: #ffb380;
+    }
+    
+    .send-button {
+      background: linear-gradient(45deg, #ff8c42, #ffc87c);
+      color: white;
+      border: none;
+      padding: 1rem 2.5rem;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border-radius: 25px;
+      cursor: pointer;
+      font-family: 'Sarabun', sans-serif;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(255, 140, 66, 0.4);
+      width: 100%;
+    }
+    
+    .send-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(255, 140, 66, 0.6);
+    }
+    
+    .send-button:active {
+      transform: translateY(-1px);
+    }
+    
+    .send-button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .success-message {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(144, 238, 144, 0.2);
+      border: 2px solid #90EE90;
+      border-radius: 15px;
+      color: #228B22;
+      font-weight: 600;
+      display: none;
+      animation: slideIn 0.5s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    .error-message {
+      color: #e74c3c;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+    
+    /* Decorative elements */
+    .lotus {
+      position: absolute;
+      font-size: 2rem;
+      animation: pulse 3s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+    
+    .lotus-1 { top: -20px; left: -20px; }
+    .lotus-2 { top: -20px; right: -20px; animation-delay: 1s; }
+    .lotus-3 { bottom: -20px; left: -20px; animation-delay: 2s; }
+    .lotus-4 { bottom: -20px; right: -20px; animation-delay: 1.5s; }
+    
+    @media (max-width: 600px) {
+      .container {
+        padding: 1.5rem 1rem;
+        max-width: 95vw;
+      }
+      
+      .title {
+        font-size: 1.5rem;
+      }
+      
+      .krathong-track {
+        grid-auto-columns: minmax(110px, 1fr);
+        gap: 10px;
+      }
+      
+      .krathong-img {
+        width: 64px;
+        height: 64px;
+      }
+      
+      .krathong-name {
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <video id="bgVideo" autoplay muted loop playsinline>
+    <source src="videos/background.mp4" type="video/mp4">
+    <!-- <source src="videos/background.webm" type="video/webm"> -->
+  </video>
+  <div class="container">
+    <!--<div class="lotus lotus-1">🪷</div>-->
+    <!--<div class="lotus lotus-2">🏮</div>-->
+    <!--<div class="lotus lotus-3">🕯️</div>-->
+    <!--<div class="lotus lotus-4">🪷</div>-->
+    
+    <h1 class="title">✨ปล่อยใจไปลอยกระทง✨</h1>
+    <!--<p class="subtitle">เลือกและส่งข้อความของคุณ ✨</p>-->
+    
+    <div class="krathong-selector">
+      <div class="section-title">Select Your Krathong</div>
+      <div class="krathong-carousel">
+        <button type="button" class="nav-button" onclick="prevKrathong()">‹</button>
+        <div class="krathong-track" id="krathongTrack">
+          <div class="krathong-option" data-krathong="lotus" onclick="selectKrathong('lotus')">
+            <img class="krathong-img" src="img/Krathong-1.png" alt="กระทงดอกบัว">
+            <span class="krathong-name">กระทงดอกบัว</span>
+          </div>
+          <div class="krathong-option" data-krathong="banana" onclick="selectKrathong('banana')">
+            <img class="krathong-img" src="img/Krathong-2.png" alt="กระทงใบตอง">
+            <span class="krathong-name">กระทงใบตอง</span>
+          </div>
+          <div class="krathong-option" data-krathong="flower" onclick="selectKrathong('flower')">
+            <img class="krathong-img" src="images/flower.png" alt="กระทงดอกไม้">
+            <span class="krathong-name">กระทงดอกไม้</span>
+          </div>
+          <div class="krathong-option" data-krathong="rose" onclick="selectKrathong('rose')">
+            <img class="krathong-img" src="images/rose.png" alt="กระทงกุหลาบ">
+            <span class="krathong-name">กระทงกุหลาบ</span>
+          </div>
+          <div class="krathong-option" data-krathong="lantern" onclick="selectKrathong('lantern')">
+            <img class="krathong-img" src="images/lantern.png" alt="โคมลอย">
+            <span class="krathong-name">โคมลอย</span>
+          </div>
+          <div class="krathong-option" data-krathong="candle" onclick="selectKrathong('candle')">
+            <img class="krathong-img" src="images/candle.png" alt="กระทงเทียน">
+            <span class="krathong-name">กระทงเทียน</span>
+          </div>
+        </div>
+        <button type="button" class="nav-button" onclick="nextKrathong()">›</button>
+      </div>
+      <div id="krathongError" class="error-message">กรุณาเลือกกระทงก่อนส่ง</div>
+    </div>
+    
+    <div class="input-container">
+      <label class="message-label">อยากจะขออะไรล่ะ :</label>
+      <input 
+        type="text" 
+        id="messageInput" 
+        class="message-input"
+        placeholder="ขอให้มีแฟนก่อนสิ้นปี..."
+        maxlength="150"
+      >
+      <div id="messageError" class="error-message">กรุณาพิมพ์ความปรารถนา</div>
+    </div>
+    
+    <button class="send-button" onclick="sendKrathong()">ส่งข้อความ</button>
+    
+    <div id="successMessage" class="success-message">
+      ลอยกระทงสำเร็จแล้ว! 🎉<br>
+      <small>ขอให้สิ่งดีๆ เกิดขึ้นกับคุณ 🙏</small>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js';
+    import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAYAA--dU7azrYQaFJfsmMvfxLI-NNtoxU",
+      authDomain: "sendtd-demo.firebaseapp.com",
+      projectId: "sendtd-demo",
+      storageBucket: "sendtd-demo.firebasestorage.app",
+      messagingSenderId: "201616527485",
+      appId: "1:201616527485:web:81efdec075072761eaa114",
+      measurementId: "G-D3RF03J1N7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.sendToFirebase = async function(krathong, message) {
+      try {
+        await addDoc(collection(db, "krathongs"), {
+          krathong: krathong,
+          text: message,
+          timestamp: serverTimestamp()
+        });
+        console.log("Krathong sent successfully!");
+        return true;
+      } catch (error) {
+        console.error("Error sending krathong:", error);
+        return false;
+      }
+    };
+  </script>
+  
+  <script>
+    let selectedKrathong = null;
+    let krathongTypes = ['lotus','banana','flower','rose','lantern','candle'];
+    let currentIndex = 0;
+    
+    // Create floating lanterns
+    function createLantern() {
+      const lantern = document.createElement('div');
+      lantern.className = 'lantern';
+      lantern.innerHTML = ['🏮', '🪷', '🕯️'][Math.floor(Math.random() * 3)];
+      lantern.style.left = Math.random() * 100 + 'vw';
+      lantern.style.animationDuration = (Math.random() * 5 + 10) + 's';
+      document.body.appendChild(lantern);
+      
+      setTimeout(() => {
+        lantern.remove();
+      }, 15000);
+    }
+    
+    setInterval(createLantern, 3000);
+    
+    window.selectKrathong = function(type) {
+      selectedKrathong = type;
+      currentIndex = Math.max(0, krathongTypes.indexOf(type));
+      
+      // Remove all selected classes
+      document.querySelectorAll('.krathong-option').forEach(option => {
+        option.classList.remove('selected');
+      });
+      
+      // Add selected class to clicked option
+      document.querySelector(`[data-krathong="${type}"]`).classList.add('selected');
+      
+      // Hide error
+      document.getElementById('krathongError').style.display = 'none';
+
+      // Center selected item
+      const el = document.querySelector(`[data-krathong="${type}"]`);
+      if (el && el.scrollIntoView) {
+        el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+    };
+
+    window.prevKrathong = function() {
+      currentIndex = (currentIndex - 1 + krathongTypes.length) % krathongTypes.length;
+      selectKrathong(krathongTypes[currentIndex]);
+    };
+
+    window.nextKrathong = function() {
+      currentIndex = (currentIndex + 1) % krathongTypes.length;
+      selectKrathong(krathongTypes[currentIndex]);
+    };
+    
+    window.sendKrathong = async function() {
+      const messageInput = document.getElementById('messageInput');
+      const message = messageInput.value.trim();
+      const successDiv = document.getElementById('successMessage');
+      const krathongError = document.getElementById('krathongError');
+      const messageError = document.getElementById('messageError');
+      const sendButton = document.querySelector('.send-button');
+      
+      // Reset errors
+      krathongError.style.display = 'none';
+      messageError.style.display = 'none';
+      
+      // Validation
+      let hasError = false;
+      
+      if (!selectedKrathong) {
+        krathongError.style.display = 'block';
+        hasError = true;
+      }
+      
+      if (!message) {
+        messageError.style.display = 'block';
+        messageInput.style.animation = 'shake 0.5s';
+        setTimeout(() => {
+          messageInput.style.animation = '';
+        }, 500);
+        hasError = true;
+      }
+      
+      if (hasError) return;
+      
+      // Disable button while sending
+      sendButton.disabled = true;
+      sendButton.textContent = 'กำลังส่ง...';
+      
+      try {
+        const success = await window.sendToFirebase(selectedKrathong, message);
+        
+        if (success) {
+          // Show success message
+          successDiv.style.display = 'block';
+          messageInput.value = '';
+          selectedKrathong = null;
+          
+          // Remove selected state
+          document.querySelectorAll('.krathong-option').forEach(option => {
+            option.classList.remove('selected');
+          });
+          
+          // Create celebration effect
+          for(let i = 0; i < 15; i++) {
+            setTimeout(createLantern, i * 100);
+          }
+          
+          // Reset after 3 seconds
+          setTimeout(() => {
+            successDiv.style.display = 'none';
+            sendButton.disabled = false;
+            sendButton.textContent = 'ส่งข้อความ';
+          }, 3000);
+        }
+        
+      } catch (error) {
+        console.error('Error:', error);
+        alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+        sendButton.disabled = false;
+        sendButton.textContent = 'ส่งข้อความ';
+      }
+    };
+    
+    // Enter key to send
+    document.getElementById('messageInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        sendKrathong();
+      }
+    });
+    
+    // Shake animation
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Initialize default selection
+    window.addEventListener('DOMContentLoaded', () => {
+      selectKrathong(krathongTypes[0]);
+    });
+  </script>
+</body>
+</html>
