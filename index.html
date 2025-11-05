@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ปล่อยใจไปลอย</title>
+  <title>ปล่อยใจไปลอยกระทง</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap');
     
@@ -24,8 +24,8 @@
       overflow-x: hidden;
     }
 
-    /* Fullscreen background video for send page */
-    #bgVideo {
+    /* Fullscreen background image for send page */
+    #bgImage {
       position: fixed;
       top: 0;
       left: 0;
@@ -35,32 +35,6 @@
       z-index: -1;
       pointer-events: none;
       background: #000;
-    }
-    
-    /* Floating lanterns animation */
-    .lantern {
-      position: absolute;
-      color: rgba(255, 200, 124, 0.3);
-      font-size: 30px;
-      animation: float-up 15s infinite linear;
-      pointer-events: none;
-    }
-    
-    @keyframes float-up {
-      0% {
-        transform: translateY(100vh) translateX(0) rotate(0deg);
-        opacity: 0;
-      }
-      10% {
-        opacity: 1;
-      }
-      90% {
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(-100px) translateX(50px) rotate(10deg);
-        opacity: 0;
-      }
     }
     
     .container {
@@ -332,10 +306,7 @@
   </style>
 </head>
 <body>
-  <video id="bgVideo" autoplay muted loop playsinline>
-    <source src="videos/background.mp4" type="video/mp4">
-    <!-- <source src="videos/background.webm" type="video/webm"> -->
-  </video>
+  <img id="bgImage" src="img/BG.png" alt="Background">
   <div class="container">
     <!--<div class="lotus lotus-1">🪷</div>-->
     <!--<div class="lotus lotus-2">🏮</div>-->
@@ -351,28 +322,28 @@
         <button type="button" class="nav-button" onclick="prevKrathong()">‹</button>
         <div class="krathong-track" id="krathongTrack">
           <div class="krathong-option" data-krathong="lotus" onclick="selectKrathong('lotus')">
-            <img class="krathong-img" src="img/Krathong-1.png" alt="กระทงดอกบัว">
-            <span class="krathong-name">กระทงดอกบัว</span>
+            <img class="krathong-img" src="img/Krathong-2.png" alt="กระทงนี้โสดน่ะจีบได้">
+            <span class="krathong-name">กระทงนี้โสดน่ะจีบได้</span>
           </div>
           <div class="krathong-option" data-krathong="banana" onclick="selectKrathong('banana')">
-            <img class="krathong-img" src="img/Krathong-2.png" alt="กระทงใบตอง">
-            <span class="krathong-name">กระทงใบตอง</span>
+            <img class="krathong-img" src="img/Krathong-1.png" alt="กระทงนี้สีเขียว">
+            <span class="krathong-name">กระทงนี้สีเขียว</span>
           </div>
           <div class="krathong-option" data-krathong="flower" onclick="selectKrathong('flower')">
-            <img class="krathong-img" src="images/flower.png" alt="กระทงดอกไม้">
-            <span class="krathong-name">กระทงดอกไม้</span>
+            <img class="krathong-img" src="img/Krathong-3.png" alt="กระทงนี้รักษ์โลก">
+            <span class="krathong-name">กระทงนี้รักษ์โลก</span>
           </div>
           <div class="krathong-option" data-krathong="rose" onclick="selectKrathong('rose')">
-            <img class="krathong-img" src="images/rose.png" alt="กระทงกุหลาบ">
-            <span class="krathong-name">กระทงกุหลาบ</span>
+            <img class="krathong-img" src="img/Krathong-4.png" alt="กระทงนี้รักแฟน">
+            <span class="krathong-name">กระทงนี้รักแฟน</span>
           </div>
           <div class="krathong-option" data-krathong="lantern" onclick="selectKrathong('lantern')">
-            <img class="krathong-img" src="images/lantern.png" alt="โคมลอย">
-            <span class="krathong-name">โคมลอย</span>
+            <img class="krathong-img" src="img/Krathong-6.png" alt="กระทงนี้ขอให้สมหวังทุกอย่าง">
+            <span class="krathong-name">กระทงนี้ขอให้สมหวังทุกอย่าง</span>
           </div>
           <div class="krathong-option" data-krathong="candle" onclick="selectKrathong('candle')">
-            <img class="krathong-img" src="images/candle.png" alt="กระทงเทียน">
-            <span class="krathong-name">กระทงเทียน</span>
+            <img class="krathong-img" src="img/Krathong-5.png" alt="กระทงนี้ของคนมีตัง">
+            <span class="krathong-name">กระทงนี้ของคนมีตัง</span>
           </div>
         </div>
         <button type="button" class="nav-button" onclick="nextKrathong()">›</button>
@@ -438,22 +409,6 @@
     let selectedKrathong = null;
     let krathongTypes = ['lotus','banana','flower','rose','lantern','candle'];
     let currentIndex = 0;
-    
-    // Create floating lanterns
-    function createLantern() {
-      const lantern = document.createElement('div');
-      lantern.className = 'lantern';
-      lantern.innerHTML = ['🏮', '🪷', '🕯️'][Math.floor(Math.random() * 3)];
-      lantern.style.left = Math.random() * 100 + 'vw';
-      lantern.style.animationDuration = (Math.random() * 5 + 10) + 's';
-      document.body.appendChild(lantern);
-      
-      setTimeout(() => {
-        lantern.remove();
-      }, 15000);
-    }
-    
-    setInterval(createLantern, 3000);
     
     window.selectKrathong = function(type) {
       selectedKrathong = type;
@@ -535,11 +490,6 @@
           document.querySelectorAll('.krathong-option').forEach(option => {
             option.classList.remove('selected');
           });
-          
-          // Create celebration effect
-          for(let i = 0; i < 15; i++) {
-            setTimeout(createLantern, i * 100);
-          }
           
           // Reset after 3 seconds
           setTimeout(() => {

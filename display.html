@@ -15,7 +15,7 @@
         
         body {
             font-family: 'Sarabun', 'Cormorant Garamond', serif;
-            background: #0000ff;
+            background: #44ff00;
             width: 100vw;
             height: 100vh;
             overflow: hidden;
@@ -80,11 +80,11 @@
         }
 
         .krathong-icon-img {
-            width: 300px;
-            height: 300px;
+            width: 100px;
+            height: 100px;
             object-fit: cover;
             border-radius: 22px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             filter: none;
             animation: gentle-float 4s ease-in-out infinite;
             background: transparent;
@@ -101,7 +101,7 @@
         }
         
         .krathong-message {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 247, 240, 0.95) 100%);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.95) 100%);
             backdrop-filter: blur(20px);
             border-radius: 16px;
             padding: 12px 18px;
@@ -146,61 +146,73 @@
             opacity: 0.8;
         }
         
-        /* Elegant floating animations */
+        /* Elegant floating animations - float upward slowly from bottom */
         .pattern-1 {
-            animation: elegant-float-1 30s ease-in-out infinite;
+            animation: elegant-float-1 40s linear forwards;
         }
         
         .pattern-2 {
-            animation: elegant-float-2 35s ease-in-out infinite;
+            animation: elegant-float-2 45s linear forwards;
         }
         
         .pattern-3 {
-            animation: elegant-float-3 40s ease-in-out infinite;
+            animation: elegant-float-3 50s linear forwards;
         }
         
         @keyframes elegant-float-1 {
-            0%, 100% { 
-                transform: translate(0, 0); 
+            0% { 
+                transform: translate(0, 0) scale(0.7);
+                opacity: 0;
             }
-            25% { 
-                transform: translate(250px, -120px); 
+            5% { 
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
             }
-            50% { 
-                transform: translate(120px, 200px); 
+            95% { 
+                transform: translate(50px, calc(-100vh - 200px)) scale(1);
+                opacity: 1;
             }
-            75% { 
-                transform: translate(-200px, 100px); 
+            100% { 
+                transform: translate(50px, calc(-100vh - 250px)) scale(0.9);
+                opacity: 0;
             }
         }
         
         @keyframes elegant-float-2 {
-            0%, 100% { 
-                transform: translate(0, 0); 
+            0% { 
+                transform: translate(0, 0) scale(0.7);
+                opacity: 0;
             }
-            20% { 
-                transform: translate(-150px, -200px); 
+            5% { 
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
             }
-            40% { 
-                transform: translate(220px, -100px); 
+            95% { 
+                transform: translate(-60px, calc(-100vh - 200px)) scale(1);
+                opacity: 1;
             }
-            60% { 
-                transform: translate(280px, 150px); 
-            }
-            80% { 
-                transform: translate(-100px, 250px); 
+            100% { 
+                transform: translate(-60px, calc(-100vh - 250px)) scale(0.9);
+                opacity: 0;
             }
         }
         
         @keyframes elegant-float-3 {
-            0%, 100% { 
-                transform: translate(0, 0); 
+            0% { 
+                transform: translate(0, 0) scale(0.7);
+                opacity: 0;
             }
-            33% { 
-                transform: translate(300px, 50px); 
+            5% { 
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
             }
-            66% { 
-                transform: translate(50px, -280px); 
+            95% { 
+                transform: translate(30px, calc(-100vh - 200px)) scale(1);
+                opacity: 1;
+            }
+            100% { 
+                transform: translate(30px, calc(-100vh - 250px)) scale(0.9);
+                opacity: 0;
             }
         }
         
@@ -357,12 +369,12 @@
         const db = getFirestore(app);
 
         const krathongImages = {
-            lotus: 'img/Krathong-1.png',
-            banana: 'img/Krathong-2.png',
-            flower: 'img/flower.png',
-            rose: 'img/rose.png',
-            lantern: 'img/lantern.png',
-            candle: 'img/candle.png'
+            lotus: 'img/Krathong-2.png',
+            banana: 'img/Krathong-1.png',
+            flower: 'img/Krathong-3.png',
+            rose: 'img/Krathong-4.png',
+            lantern: 'img/Krathong-6.png',
+            candle: 'img/Krathong-5.png'
         };
 
         const blessings = ['', '', '', '', '', ''];
@@ -401,9 +413,10 @@
 
         function getRandomPosition() {
             const margin = 180;
+            // Position at bottom of screen, slightly below viewport
             return {
                 x: Math.random() * (window.innerWidth - margin * 2) + margin,
-                y: Math.random() * (window.innerHeight - margin * 2) + margin
+                y: window.innerHeight + 100 // Start below viewport
             };
         }
 
@@ -430,14 +443,35 @@
             }
         }
 
+        function checkAndRemoveOffScreen() {
+            const nodes = Array.from(document.querySelectorAll('.krathong-container'));
+            nodes.forEach(container => {
+                const rect = container.getBoundingClientRect();
+                // Check if krathong has floated above the screen
+                if (rect.bottom < -200 || 
+                    container.style.opacity === '0' || window.getComputedStyle(container).opacity === '0') {
+                    const krathongId = container.dataset.krathongId;
+                    if (krathongId) {
+                        activeKrathongs.delete(krathongId);
+                    }
+                    container.remove();
+                    updateDebugInfo();
+                }
+            });
+        }
+
         function resolveCollisions() {
             const nodes = Array.from(document.querySelectorAll('.krathong-container'));
+            // Resolve collisions for visible krathongs
             for (let i = 0; i < nodes.length; i++) {
+                const ra = nodes[i].getBoundingClientRect();
+                // Skip if already off screen (above)
+                if (ra.bottom < 0) continue;
+                
                 for (let j = i + 1; j < nodes.length; j++) {
-                    const a = nodes[i];
-                    const b = nodes[j];
-                    const ra = a.getBoundingClientRect();
-                    const rb = b.getBoundingClientRect();
+                    const rb = nodes[j].getBoundingClientRect();
+                    if (rb.bottom < 0) continue;
+                    
                     if (rectsOverlap(ra, rb, 8)) {
                         const dx = (ra.left + ra.width / 2) - (rb.left + rb.width / 2);
                         const dy = (ra.top + ra.height / 2) - (rb.top + rb.height / 2);
@@ -445,14 +479,14 @@
                         const ux = dx / len;
                         const uy = dy / len;
                         const push = 14;
-                        const ax = Math.min(Math.max(0, (parseFloat(a.style.left) || 0) + ux * push), window.innerWidth - ra.width);
-                        const ay = Math.min(Math.max(0, (parseFloat(a.style.top) || 0) + uy * push), window.innerHeight - ra.height);
-                        const bx = Math.min(Math.max(0, (parseFloat(b.style.left) || 0) - ux * push), window.innerWidth - rb.width);
-                        const by = Math.min(Math.max(0, (parseFloat(b.style.top) || 0) - uy * push), window.innerHeight - rb.height);
-                        a.style.left = ax + 'px';
-                        a.style.top = ay + 'px';
-                        b.style.left = bx + 'px';
-                        b.style.top = by + 'px';
+                        const ax = Math.min(Math.max(0, (parseFloat(nodes[i].style.left) || 0) + ux * push), window.innerWidth - ra.width);
+                        const ay = (parseFloat(nodes[i].style.top) || 0) + uy * push;
+                        const bx = Math.min(Math.max(0, (parseFloat(nodes[j].style.left) || 0) - ux * push), window.innerWidth - rb.width);
+                        const by = (parseFloat(nodes[j].style.top) || 0) - uy * push;
+                        nodes[i].style.left = ax + 'px';
+                        nodes[i].style.top = ay + 'px';
+                        nodes[j].style.left = bx + 'px';
+                        nodes[j].style.top = by + 'px';
                     }
                 }
             }
@@ -495,16 +529,8 @@
                 container.classList.add('show');
             });
             
-            setTimeout(() => {
-                container.classList.add('fade-out');
-                setTimeout(() => {
-                    if (container.parentNode) {
-                        container.parentNode.removeChild(container);
-                    }
-                    activeKrathongs.delete(krathongId);
-                    updateDebugInfo();
-                }, 1200);
-            }, 30000);
+            // Animation will handle the upward float and fade out
+            // No need for setTimeout - checkAndRemoveOffScreen will clean up
             
             updateDebugInfo();
         }
@@ -577,6 +603,7 @@
         }, 2000);
 
         setInterval(resolveCollisions, 800);
+        setInterval(checkAndRemoveOffScreen, 500); // Check and remove off-screen krathongs
 
         window.addEventListener('resize', () => {
             const krathongs = document.querySelectorAll('.krathong-container');
